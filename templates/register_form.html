@@ -1,12 +1,20 @@
 {% extends 'base.html' %}
+{% block title %}Registration{% endblock %}
 {% block content %}
 
 <h2>Sign In</h2>
 
-<form action='/register' method='POST' id='registration'>
-    Username:<input type='text' name='username' id='username'>
-    Password:<input type='text' name='password' id='password'>
+<form action='/register' method='POST' id='registration' class='user-info'>
+    Username: <input type='text' name='username' id='username'>
+    Password: <input type='text' name='password' id='password'>
+    <br>
+    Age: <input type='number' name='age' id='age'>
+    <br>
+    ZipCode: <input type='text' name='zipcode' id='zipcode'>
+    <br>
     <input type='submit' value='Submit'>
 </form>
 
 {% endblock %}
+
+{% block javascript %}registration{% endblock %}

@@ -37,15 +37,13 @@ def user_list():
     return render_template("user_list.html", users=users)
 
 
-@app.route("/register")
-def register_form():
+@app.route("/sign-in")
+def sign_in_form():
+    return render_template("sign_in.html")
 
-    return render_template("register_form.html")
 
-
-@app.route("/register", methods=["POST"])
-def register_process():
-
+@app.route("/sign-in", methods=["POST"])
+def sign_in_process():
     username = request.form.get('username')
     password = request.form.get('password')
 
@@ -55,12 +53,42 @@ def register_process():
             pass   # login -- for clairty in code
         else:
             flash("Wrong Password")
-            return redirect('/register')
+            return redirect('/sign-in')
 
     except sqlalchemy.orm.exc.NoResultFound:
-        flash('user created: %s') % username
+        flash("Email not found, please try again or create a new account")
+        return redirect('/sign-in')
+
+    session['user_id'] = user_object.user_id
+    print(session)
+    flash("Logged In")
+    return redirect("/")
+
+
+@app.route("/register")
+def register_form():
+    return render_template("register_form.html")
+
+
+@app.route("/register", methods=["POST"])
+def register_process():
+
+    username = request.form.get('username')
+    password = request.form.get('password')
+    age = request.form.get('age')
+    zipcode = request.form.get('zipcode')
+
+    try:
+        user_object = User.query.filter_by(email=username).one()
+        flash('User already exists, please sign in or use another email')
+        return redirect('/register')
+
+    except sqlalchemy.orm.exc.NoResultFound:
+        # flash('user created: %s') % (username)
         user_object = User(email=username,
-                           password=password)
+                           password=password,
+                           age=age,
+                           zipcode=zipcode)
 
         # We need to add to the session or it won't ever be stored
         db.session.add(user_object)

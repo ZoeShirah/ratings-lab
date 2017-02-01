@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-  <title>Ratings</title>
+<title>Ratings -- {% block title %}PAGE TITLE GOES HERE{% endblock %}</title>
   {% with messages = get_flashed_messages() %}
   {% if messages %}
     <ul class=flashes>
@@ -18,7 +18,8 @@
 <body>
   Ratings
   <br>
-   <a href='/'><button>Home</button></a>  <a href='/logout'><button>Logout</button></a>    <a href='/register'><button>LogIn</button></a> 
+   <a href='/'><button>Home</button></a>  <a href='/logout'><button>Logout</button></a>    <a href='/sign-in'><button>LogIn</button></a>  
+       <a href='/register'><button>Sign Up</button></a>
 
   <hr>
 
@@ -26,6 +27,7 @@
 
 
 <script src='/static/scripts.js'></script>
+<script src='/static/{% block javascript %}PAGE SPECIFIC JAVASCRIPT{% endblock %}.js'></script>
 
 </body>
 </html>

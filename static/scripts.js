@@ -1,4 +1,4 @@
-$('#registration').on('submit', function(evt) {
+$('.user-info').on('submit', function(evt) {
     // evt.preventDefault();
     var userChars = $('#username').val();
     console.log('userChars: ' +userChars);
@@ -16,3 +16,4 @@ $('#registration').on('submit', function(evt) {
     }
 
 });
+
