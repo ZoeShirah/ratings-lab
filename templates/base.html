@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <title>Ratings</title>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+<script src="https://code.jquery.com/jquery.js"></script>
+</head>
+
+
+<body>
+  Ratings
+  <br>
+   <a href='/'><button>Home</button></a>  <a href='/logout'><button>Logout</button></a>    <a href='/register'><button>LogIn</button></a> 
+
+  <hr>
+
+  {% block content %} put your content here {% endblock %}
+
+
+<script src='/static/scripts.js'></script>
+
+</body>
+</html>
