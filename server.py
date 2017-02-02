@@ -80,6 +80,28 @@ def show_movie(movie_id):
                            movie_ratings=movie_ratings)
 
 
+@app.route("/movies/<movie_id>", methods=['POST'])
+def process_rating(movie_id):
+
+    score = request.form.get('score')
+
+    user_id = session.get('user_id')
+    print 'user_id: %s rated %s %s' % (user_id, movie_id, score)
+
+    rating_object = Rating.query.filter_by(user_id=user_id).filter_by(movie_id=int(movie_id)).first()
+    if rating_object is None:
+        rating_object = Rating(movie_id=int(movie_id),
+                               user_id=user_id,
+                               score=score)
+        db.session.add(rating_object)
+
+    else:
+        rating_object.score = score
+
+    db.session.commit()
+    return redirect("/movies/" + movie_id)
+
+
 @app.route("/sign-in")
 def sign_in_form():
     if session.get('logged_in') is True:
@@ -161,6 +183,7 @@ def register_process():
 def logout_process():
     if session.get('logged_in') is True:
         del session['user_id']
+        del session['logged_in']
         flash('logged out')
     else:
         flash('not logged in')

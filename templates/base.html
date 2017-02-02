@@ -18,8 +18,14 @@
 <body>
   Ratings
   <br>
-   <a href='/'><button>Home</button></a>  <a href='/logout'><button>Logout</button></a>    <a href='/sign-in'><button>LogIn</button></a>  
-       <a href='/register'><button>Sign Up</button></a>
+   <a href='/'><button>Home</button></a>  
+
+  {% if 'logged_in' not in session %}
+    <a href='/sign-in'><button>LogIn</button></a>  
+    <a href='/register'><button>Sign Up</button></a>
+  {% else %}
+    <a href='/logout'><button>Logout</button></a>
+  {% endif %}
 
   <hr>
 
