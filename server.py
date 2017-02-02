@@ -37,9 +37,56 @@ def user_list():
     return render_template("user_list.html", users=users)
 
 
+@app.route("/users/<user_id>")
+def show_user(user_id):
+
+    user_object = User.query.filter_by(user_id=user_id).one()
+    rating_objects = Rating.query.filter_by(user_id=user_id).all()
+    movie_ratings = {}
+
+    for rating_object in rating_objects:
+        movie_object = Movie.query.filter_by(movie_id=rating_object.movie_id).one()
+        movie_ratings[movie_object.movie_id] = {'score': rating_object.score,
+                                                'title': movie_object.title}
+
+    return render_template("user_info.html",
+                           user=user_object,
+                           movie_ratings=movie_ratings)
+
+
+@app.route("/movies")
+def movie_list():
+    """Show list of movies."""
+
+    movies = Movie.query.order_by(Movie.title).all()
+
+    return render_template("movie_list.html", movies=movies)
+
+
+@app.route("/movies/<movie_id>")
+def show_movie(movie_id):
+
+    movie_object = Movie.query.filter_by(movie_id=movie_id).one()
+    rating_objects = Rating.query.filter_by(movie_id=movie_id).all()
+    movie_ratings = {}
+
+    for rating_object in rating_objects:
+        user_object = User.query.filter_by(user_id=rating_object.user_id).one()
+        movie_ratings[user_object.user_id] = {'score': rating_object.score,
+                                              'username': user_object.email}
+
+    return render_template("movie_info.html",
+                           movie=movie_object,
+                           movie_ratings=movie_ratings)
+
+
 @app.route("/sign-in")
 def sign_in_form():
-    return render_template("sign_in.html")
+    if session.get('logged_in') is True:
+        flash('user already signed in')
+        return redirect('/')
+    else:
+        return render_template("sign_in.html")
 
 
 @app.route("/sign-in", methods=["POST"])
@@ -59,15 +106,22 @@ def sign_in_process():
         flash("Email not found, please try again or create a new account")
         return redirect('/sign-in')
 
-    session['user_id'] = user_object.user_id
+    user_id = user_object.user_id
+    session['user_id'] = user_id
+    session['logged_in'] = True
     print(session)
     flash("Logged In")
-    return redirect("/")
+    return redirect("/users/" + str(user_id))
 
 
 @app.route("/register")
 def register_form():
-    return render_template("register_form.html")
+
+    if session.get('logged_in') is True:
+        flash('user already signed in')
+        return redirect('/')
+    else:
+        return render_template("register_form.html")
 
 
 @app.route("/register", methods=["POST"])
@@ -97,6 +151,7 @@ def register_process():
         db.session.commit()
 
     session['user_id'] = user_object.user_id
+    session['logged_in'] = True
     print(session)
     flash("Logged In")
     return redirect("/")
@@ -104,11 +159,13 @@ def register_process():
 
 @app.route('/logout')
 def logout_process():
+    if session.get('logged_in') is True:
+        del session['user_id']
+        flash('logged out')
+    else:
+        flash('not logged in')
 
-    del session['user_id']
-    flash('logged out')
-    return redirect('/register')
-
+    return redirect('/sign-in')
 
 
 

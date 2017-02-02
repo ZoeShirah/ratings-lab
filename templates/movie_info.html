@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Movie Info{% endblock %}
+
+{% block content %}
+
+<h1>{{ movie.title }}</h1>
+
+<h2>Release Date: </h2> {{ movie.released_at }}<h2>IMDB: </h2>{{ movie.imdb_url }}
+
+<h3>Your Rating: </h3>
+<form action="#" id="user-rating">
+    Rating: <input type="number">
+    <input type="submit">
+</form>
+
+
+<h3>Ratings:</h3>
+<br>
+<ul>
+{% for key, value in movie_ratings.iteritems() %}
+    <a href='/users/{{ key }}'><li>{{ value.username }}</a>: {{ value.score }} -- ({{ key }})</li>
+{% endfor %}
+</ul>
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}User Info{% endblock %}
+
+{% block content %}
+
+<h2>Info for {{ user.email }}</h2>
+
+<h3>Age:</h3> {{ user.age }}
+
+<h3>Zipcode:</h3> {{ user.zipcode }}
+
+<h3>Ratings:</h3>
+<br>
+<ul>
+{% for key, value in movie_ratings.iteritems() %}
+    <a href='/movies/{{ key }}'><li>{{ value.title }}</a>: {{ value.score }}</li>
+{% endfor %}
+</ul>
+
+
+
+
+
+
+
+{% endblock %}
