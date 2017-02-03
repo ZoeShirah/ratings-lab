@@ -112,6 +112,12 @@ class Rating(db.Model):
         return s % (self.rating_id, self.user_id, self. movie_id, self.score)
 
 
+def find_movie_by_title(title):
+
+    movie_list = Movie.query.filter_by(title=title).all()
+
+    return movie_list
+
 
 ##############################################################################
 # Helper functions

@@ -10,7 +10,7 @@ import decimal
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 
-from model import User, Rating, Movie, connect_to_db, db
+from model import User, Rating, Movie, connect_to_db, db, find_movie_by_title
 
 
 app = Flask(__name__)
@@ -270,6 +270,19 @@ def logout_process():
     return redirect('/sign-in')
 
 
+@app.route('/search', methods=['GET'])
+def search():
+
+    title = request.args.get('title')
+
+    movies = find_movie_by_title(title)
+
+    if len(movies) == 1:
+        movie_id = movies[0].movie_id
+        return redirect('movies/' + str(movie_id))
+
+    return render_template('results.html',
+                           movies=movies)
 
 
 if __name__ == "__main__":
