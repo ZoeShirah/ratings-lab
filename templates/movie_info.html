@@ -7,6 +7,18 @@
 
 <h2>Release Date: </h2> {{ movie.released_at }}<h2>IMDB: </h2>{{ movie.imdb_url }}
 
+<p>Eye's Rating: {% if eye_rating == None %}
+        {{ eye_rating }}
+    {% else %}
+        {{ '%0.2f' | format(eye_rating) }}</p>
+    {% endif %}
+<p>Average rating: {{ '%0.2f' | format(average) }}</p>
+{% if prediction %}
+    <p>We predict you will rate this movie {{ '%0.2f' | format(prediction) }}.</p>
+{% endif %}
+
+<p>Eye's message to you: {{ beratement }}</p>
+
 {% if 'logged_in' in session %}
 <h3>Your Rating: </h3>
 <form action="/movies/{{ movie.movie_id }}" id="user-rating" method='POST'>

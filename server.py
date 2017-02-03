@@ -5,6 +5,8 @@ from jinja2 import StrictUndefined
 from flask import Flask, jsonify, render_template, redirect, request, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 
+import decimal
+
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 
@@ -20,6 +22,16 @@ app.secret_key = "ABC"
 # silently. This is horrible. Fix this so that, instead, it raises an
 # error.
 app.jinja_env.undefined = StrictUndefined
+
+BERATEMENT_MESSAGES = [
+    "I suppose you don't have such bad taste after all.",
+    "I regret every decision that I've ever made that has " +
+    "brought me to listen to your opinion.",
+    "Words fail me, as your taste in movies has clearly " +
+    "failed you.",
+    "That movie is great. For a clown to watch. Idiot.",
+    "Words cannot express the awfulness of your taste."
+    ]
 
 
 @app.route('/')
@@ -70,6 +82,69 @@ def show_movie(movie_id):
     rating_objects = Rating.query.filter_by(movie_id=movie_id).all()
     movie_ratings = {}
 
+    user_id = session.get('user_id')
+
+    # Get average rating of movie
+
+    rating_scores = [r.score for r in movie_object.ratings]
+    avg_rating = float(sum(rating_scores)) / len(rating_scores)
+
+    prediction = None
+
+    if user_id:
+        user_rating = Rating.query.filter_by(
+            movie_id=movie_id, user_id=user_id).first()
+
+    else:
+        user_rating = None
+
+    if (not user_rating) and user_id:
+        user = User.query.get(user_id)
+        if user:
+            prediction = user.predict_rating(movie_object)
+
+    # Either use the prediction or their real rating
+
+    if prediction:
+        # User hasn't scored; use our prediction if we made one
+        effective_rating = prediction
+
+    elif user_rating:
+        # User has already scored for real; use that
+        effective_rating = user_rating.score
+
+    else:
+        # User hasn't scored, and we couldn't get a prediction
+        effective_rating = None
+
+    # Get the eye's rating, either by predicting or using real rating
+
+    the_eye = (User.query.filter_by(email="eye@judgeyou.com")
+                         .one())
+    eye_rating = Rating.query.filter_by(
+        user_id=the_eye.user_id, movie_id=movie_object.movie_id).first()
+
+    if eye_rating is None:
+        eye_rating = the_eye.predict_rating(movie_object)
+
+    else:
+        eye_rating = eye_rating.score
+
+    if eye_rating and effective_rating:
+        difference = abs(eye_rating - effective_rating)
+
+    else:
+        # We couldn't get an eye rating, so we'll skip difference
+        difference = None
+        print 'hello'
+
+    if difference is not None:
+        beratement = BERATEMENT_MESSAGES[int(difference)]
+        print beratement
+
+    else:
+        beratement = None
+
     for rating_object in rating_objects:
         user_object = User.query.filter_by(user_id=rating_object.user_id).one()
         movie_ratings[user_object.user_id] = {'score': rating_object.score,
@@ -77,6 +152,11 @@ def show_movie(movie_id):
 
     return render_template("movie_info.html",
                            movie=movie_object,
+                           user_rating=user_rating,
+                           average=avg_rating,
+                           prediction=prediction,
+                           beratement=beratement,
+                           eye_rating=eye_rating,
                            movie_ratings=movie_ratings)
 
 
@@ -86,7 +166,6 @@ def process_rating(movie_id):
     score = request.form.get('score')
 
     user_id = session.get('user_id')
-    print 'user_id: %s rated %s %s' % (user_id, movie_id, score)
 
     rating_object = Rating.query.filter_by(user_id=user_id).filter_by(movie_id=int(movie_id)).first()
     if rating_object is None:
